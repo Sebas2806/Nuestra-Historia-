@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <!-- CRÍTICO PARA RESPONSIVIDAD: Asegura que el contenido se escala al ancho del dispositivo -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuestra Historia - Un Viaje Mes a Mes</title>
+    <!-- Carga de Tailwind CSS para estilos de utilidad -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fuentes para el diseño Romántico/Vintage -->
+    <style>
+        /* Importación de fuentes */
+        @import url('https://fonts.googleapis.com/css2?family=Great+Vibes:wght@400;700&family=Dancing+Script:wght@400..700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+        
+        /* Paleta de colores Lujosa y Romántica */
+        :root {
+            --color-cover: #4B0014; /* Borgoña oscuro, casi terciopelo */
+            --color-spine: #3A0010; /* Lomo más oscuro */
+            --color-paper: #fff8ee; /* Crema suave / marfil */
+            --color-paper-shadow: #f0e6d6;
+            --color-accent: #C44365; /* Rosa Rubí */
+            --color-text: #444444; /* Gris carbón */
+            --book-width: 400px; /* Tamaño por defecto (desktop) */
+            --book-height: 550px; 
+        }
+
+        /* Estilos generales del cuerpo */
+        body {
+            font-family: 'Crimson Text', serif; /* Base para el cuerpo */
+            background: linear-gradient(135deg, #f7e3c9 0%, #ecd3d3 100%); /* Fondo rosado claro */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center;
+            overflow: hidden;
+            perspective: 3000px; 
+        }
+
+        /* --- Estilos de Scrollbar Personalizados (Compatible con Chrome, Edge y Safari) --- */
+        
+        .page-content-scroll::-webkit-scrollbar {
+            width: 8px; /* Ancho de la barra de desplazamiento */
+        }
+
+        .page-content-scroll::-webkit-scrollbar-track {
+            background: var(--color-paper-shadow); /* Fondo de la pista (sutil) */
+            border-radius: 10px;
+        }
+
+        .page-content-scroll::-webkit-scrollbar-thumb {
+            background-color: var(--color-accent); /* Color de la "manija" (Rosa Rubí) */
+            border-radius: 10px;
+            border: 2px solid var(--color-paper-shadow); /* Borde para separarlo de la pista */
+        }
+
+        .page-content-scroll::-webkit-scrollbar-thumb:hover {
+            background-color: #A0522D; /* Un tono más oscuro en hover para un efecto suave */
+        }
+        
+        /* Para Firefox */
+        .page-content-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: var(--color-accent) var(--color-paper-shadow);
+        }
+
+        /* --- Contenedor del Libro (Responsive) --- */
+        .book-container {
+            width: var(--book-width);
+            height: var(--book-height);
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transform: rotateY(0deg);
+            box-shadow: 20px 20px 60px rgba(0, 0, 0, 0.5), -10px -10px 30px rgba(255, 255, 255, 0.1);
+        }
+        
+        .book-container.open {
+            transform: rotateY(30deg); 
+            box-shadow: none; 
+        }
+
+        /* Media Query para móvil: Reducir tamaño del libro en pantallas pequeñas */
+        @media (max-width: 600px) {
+            :root {
+                --book-width: 280px;
+                --book-height: 400px;
+            }
+            .book-container {
+                 margin: 1rem;
+            }
+        }
+
+        .book-spine {
+            position: absolute;
+            width: 35px; 
+            height: 100%;
+            background-color: var(--color-spine);
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%) rotateY(90deg) translateZ(-17.5px); 
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.7);
+        }
+
+        /* --- Páginas y Tapas --- */
+        .page, .cover-front, .cover-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-origin: left center;
+            backface-visibility: hidden; 
+            transition: transform 1s cubic-bezier(0.5, 0.0, 0.3, 1.0); 
+            border-radius: 6px; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Tapa frontal */
+        .cover-front {
+            background-color: var(--color-cover);
+            transform: translateZ(17.5px) rotateY(0deg); 
+            z-index: 100;
+            color: var(--color-paper);
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+            box-shadow: 
+                inset 0 0 0 8px var(--color-paper), 
+                inset 0 0 0 10px #D4AF37, 
+                inset 0 0 0 14px var(--color-paper), 
+                0 4px 20px rgba(0, 0, 0, 0.4); 
+            
+            background-image: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.3) 100%);
+        }
+
+        .cover-front.flipped {
+            transform: rotateY(-180deg) rotateX(-5deg) rotateZ(1deg) translateZ(17.5px);
+            transition: transform 1.5s cubic-bezier(0.6, 0.05, 0.3, 0.95); 
+        }
+
+        .cover-back {
+            background-color: var(--color-spine);
+            transform: rotateY(180deg) translateZ(17.5px);
+            z-index: 99;
+        }
+
+        .pages-block {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transform: translateZ(17.5px);
+        }
+
+        .pages-block.hidden-pages {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        /* --- Estilo de Papel Envejecido y Tipografía Interior --- */
+        .page {
+            background-color: var(--color-paper);
+            color: var(--color-text);
+            background-image: radial-gradient(circle at 50% 50%, var(--color-paper) 80%, var(--color-paper-shadow) 100%);
+            
+            box-shadow: inset 0 0 20px rgba(100, 50, 0, 0.15); 
+            padding: 2rem;
+            line-height: 1.7; 
+            font-family: 'Crimson Text', serif; 
+            font-size: 1.1rem; 
+            
+            /* APLICACIÓN DE FLEXBOX PARA GESTIONAR LA ALTURA DEL CONTENIDO */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Asegura que el contenido comience desde arriba */
+        }
+
+        /* Contenedor del contenido (cuerpo de texto) */
+        .page-content-container {
+            flex-grow: 1; /* Esto hace que el div ocupe todo el espacio restante */
+            min-height: 0; /* Necesario en Flexbox para permitir que el contenido interno se desplace */
+            /* Se añade padding-bottom para que el texto no toque el número de página absoluto */
+            padding-bottom: 2rem; 
+        }
+        
+        .page.active { 
+            z-index: 50; 
+            transform: rotateY(0deg); 
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3); 
+        }
+        
+        .page.flipped { 
+            z-index: 55; 
+            transform: rotateY(-180deg) rotateX(-10deg);
+        }
+        
+        .page.prev-flipped { 
+            z-index: 45; 
+            transform: rotateY(-180deg);
+        }
+        
+        /* Contenido de la portada */
+        .cover-title { 
+            font-family: 'Great Vibes', cursive; 
+            font-size: 5.5rem; 
+            line-height: 1;
+            padding: 0 1rem;
+            color: #D4AF37; 
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(212, 175, 55, 0.6); 
+        }
+        .cover-subtitle { 
+            font-family: 'Crimson Text', serif;
+            font-size: 1.4rem; 
+            font-style: italic;
+            color: var(--color-paper);
+            margin-top: 1rem;
+        }
+
+        /* TÍTULOS INTERIORES: Dancing Script (se ajusta la altura de forma natural con flex-shrink: 0) */
+        .page-title { 
+            color: var(--color-accent);
+            border-bottom: 3px double #D4AF37;
+            padding-bottom: 8px;
+            margin-bottom: 2rem;
+            font-size: 2.2rem;
+            font-family: 'Dancing Script', cursive; 
+            font-weight: 700;
+            text-align: center;
+            flex-shrink: 0; /* Asegura que no intente crecer */
+        }
+        
+        /* Ajuste de título para móviles */
+        @media (max-width: 600px) {
+            .cover-title {
+                font-size: 4rem;
+            }
+            .page-title {
+                font-size: 1.8rem;
+            }
+            .page {
+                padding: 1.5rem;
+                font-size: 1rem;
+            }
+        }
+
+        /* Destacar el texto fuerte */
+        .page p strong {
+            color: var(--color-accent);
+            font-weight: 600;
+        }
+
+        /* --- Estilos de Botones (Románticos) --- */
+        
+        .elegant-button {
+            font-family: 'Great Vibes', cursive; 
+            background-color: #8B4513; 
+            color: var(--color-paper); 
+            border: 2px solid var(--color-accent); 
+            border-radius: 50px; 
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); 
+            transition: all 0.3s ease-in-out;
+            letter-spacing: 1px;
+            font-size: 1.3rem; 
+            padding: 0.75rem 2.5rem; 
+        }
+        .elegant-button:hover {
+            background-color: #A0522D; 
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+            transform: translateY(-4px) scale(1.01);
+        }
+
+        .nav-button-vibe {
+            font-family: 'Dancing Script', cursive;
+            background-color: var(--color-accent); 
+            color: var(--color-paper); 
+            padding: 0.3rem 1rem; 
+            border-radius: 9999px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+            font-size: 1.4rem;
+            font-weight: 700; 
+            transition: all 0.2s ease-in-out; 
+        }
+        .nav-button-vibe:hover:not(:disabled) {
+            transform: scale(1.08); 
+            background-color: #D87093; 
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+        }
+        .nav-button-vibe:disabled {
+            opacity: 0.4; 
+            cursor: not-allowed;
+            transform: scale(1); 
+            box-shadow: none;
+        }
+        
+        .page-indicator-style {
+            font-family: 'Crimson Text', serif;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #5d4037; 
+            font-style: italic;
+        }
+
+        .controls-container {
+            width: 90%; 
+            max-width: 600px;
+            padding: 1rem;
+        }
+
+    </style>
+</head>
+<body class="flex flex-col gap-8 justify-center items-center h-screen">
+
+    <!-- Contenedor del Libro 3D -->
+    <div id="bookContainer" class="book-container">
+        
+        <!-- Lomo del libro -->
+        <div class="book-spine"></div>
+
+        <!-- Tapa Frontal con Título Romántico. INICIO DE LA HISTORIA -->
+        <div id="coverFront" class="cover-front flex flex-col justify-center items-center p-8 text-center">
+            
+            <p class="cover-title">Nuestra Historia</p>
+            <p class="cover-subtitle mt-4">Un Viaje Mes a Mes</p>
+            
+        </div>
+
+        <!-- Tapa Trasera (Parte trasera de la tapa frontal cuando está abierta) -->
+        <div class="cover-back"></div>
+
+        <!-- Contenedor de las Páginas -->
+        <div id="pagesBlock" class="pages-block hidden-pages">
+            <!-- Las páginas se generarán aquí por JavaScript -->
+        </div>
+
+    </div>
+
+    <!-- Controles y Navegación -->
+    <div class="controls-container flex flex-col items-center gap-6">
+        
+        <!-- Botón Abrir/Cerrar Libro -->
+        <button id="toggleBookBtn" onclick="toggleBook()"
+            class="elegant-button tracking-wider w-full md:w-auto">
+            Abrir Libro
+        </button>
+
+        <!-- Controles de Navegación -->
+        <div id="navigationControls" class="flex justify-between w-full md:w-3/4 max-w-xs opacity-0 pointer-events-none transition-opacity duration-700">
+            <button id="prevPageBtn" onclick="prevPage()" disabled
+                class="nav-button-vibe flex items-center shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 mr-1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                </svg>
+                Anterior
+            </button>
+            
+            <!-- Indicador de página -->
+            <span id="pageIndicator" class="page-indicator-style self-center">Pág. 1 / 24</span>
+            
+            <button id="nextPageBtn" onclick="nextPage()"
+                class="nav-button-vibe flex items-center shadow-lg">
+                Siguiente
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 ml-1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Sonido de pasar página (PCM base64 audio data) -->
+        <audio id="pageTurnSound" src="data:audio/wav;base64,UklGRtD9AABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YUo%2FDQAGBgYGBAgICAkJCQkKCgoLCwsMDAwMDAwNDQ0NDQ0ODg4PDw8PDw8QEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBEload="none"></audio>
+        
+    </div>
+
+    <script type="module">
+        // --- Constantes y Variables Globales ---
+        
+        const bookContainer = document.getElementById('bookContainer');
+        const pagesBlock = document.getElementById('pagesBlock');
+        const coverFront = document.getElementById('coverFront');
+        const toggleBookBtn = document.getElementById('toggleBookBtn');
+        const navigationControls = document.getElementById('navigationControls');
+        const prevPageBtn = document.getElementById('prevPageBtn');
+        const nextPageBtn = document.getElementById('nextPageBtn');
+        const pageIndicator = document.getElementById('pageIndicator');
+        const pageTurnSound = document.getElementById('pageTurnSound');
+
+        // Estado: INICIA CERRADO por defecto
+        let isBookOpen = false; 
+        let currentPageIndex = 0;
+        
+        // --- Contenido de las páginas (24 Meses + Hoy) ---
+        // Contenido de ejemplo (dejado intacto)
+        const pageContent = [
+            { title: "🌙 Enero 2024", text: "El 28 de enero de 2024 te vi por primera vez, y aunque todo alrededor parecía normal, dentro de mí algo cambió para siempre. Fue como si el mundo hubiera hecho silencio para dejarme escucharte mejor. En tu mirada descubrí un brillo que no había visto en nadie, y sin entenderlo del todo, supe que ese día marcaba el inicio de algo grande. No te imaginabas que ese encuentro despertó en mí una esperanza nueva, una calidez que hacía años no sentía. Ese día nació una historia que hoy es mi vida entera: <strong>nosotros</strong>." },
+            { title: "💘 Febrero 2024", text: "Febrero llegó con nervios, ilusión y ganas de acercarme más a ti. El 14 de febrero te di chocolates, pero lo que realmente quería darte era un pedacito de mi alma que empezaba a enamorarse en silencio. No sabía si te imaginabas lo que yo ya sentía, pero esperaba que ese detalle te dijera, aunque fuera en susurros: <strong>“Me importas. Mucho.”</strong> Aquel pequeño regalo fue el primer paso de muchos, el primer latido que te perteneció." },
+            { title: "✨ Marzo 2024", text: "En marzo reuní valor y te entregué una pulserita de plata… pero en realidad quería entregarte algo más profundo: <strong>la pureza de mis intenciones</strong>. Esa pulsera brillaba como tú, delicada pero fuerte, hermosa sin esfuerzo. Y mientras la tenías en tus manos, yo solo pensaba: “Ojalá un día pueda tomar tu mano y nunca soltarla.” Ese regalo fue mi manera silenciosa de decirte que quería cuidarte, acompañarte y construir algo bonito contigo." },
+            { title: "💍 Abril 2024", text: "El 6 de abril se convirtió en uno de los días más importantes de mi vida: <strong>nos hicimos novios</strong>. Ese sí que nos dimos abrió un mundo que todavía seguimos descubriendo juntos. Ese día no solo te elegí… te reconocí. Reconocí que eras la mujer que mi corazón llevaba tiempo buscando sin saberlo. Desde entonces, cada día contigo ha sido un recordatorio de que el amor verdadero existe, y yo lo encontré en ti." },
+            { title: "🌺 Mayo 2024", text: "Mayo fue un mes suave, lleno de descubrimientos pequeños pero profundos. Aprendí tus gestos, la forma en que inclinas la cabeza cuando algo te da risa, la manera en que tus ojos brillan cuando estás feliz. Me enamoré de tus detalles, de tus palabras, de tus silencios. Me di cuenta de que amar no es solo sentir… <strong>es conocer, respetar, cuidar y elegir cada día</strong>. Y yo te elegí en mayo, igual que te elijo hoy." },
+            { title: "🌤 Junio 2024", text: "Junio trajo tardes tranquilas, momentos simples que se convertían en tesoros. Contigo descubrí que no hacen falta grandes planes para sentir felicidad; basta con tenerte cerca. A tu lado, incluso el silencio se siente cómodo, dulce, perfecto. Ese mes entendí que cuando se ama de verdad, <strong>la vida encuentra nuevas formas de brillar</strong>." },
+            { title: "🌷 Julio 2024", text: "Julio fue un jardín de recuerdos. Pequeños momentos que parecían normales, pero que con el tiempo se convirtieron en semillas de una historia profunda. Cada sonrisa tuya se quedaba guardada en mi alma, cada abrazo me enseñaba que había encontrado mi refugio. Ese mes supe que <strong>ya no podía imaginar mi vida sin ti</strong>." },
+            { title: "🎂 Agosto 2024", text: "El 5 de agosto, tu cumpleaños, marcó uno de mis días favoritos del año. Quería que ese día sintieras cuán valiosa eres, lo mucho que iluminas mi mundo, lo afortunado que me siento de llamar “mi novia” a una mujer tan maravillosa como tú. Ese día celebré que existes, que sonríes, que sueñas… y sobre todo, <strong>que estás conmigo</strong>." },
+            { title: "💞 Septiembre 2024", text: "En septiembre te entregué un anillo, símbolo de algo profundo y honesto. No era un simple regalo. Era una promesa silenciosa de mi corazón: <strong>“Estoy contigo. Te elijo. Te valoro. Te cuido.”</strong> Cuando lo pusiste en tu dedo, sentí que nuestro amor tomaba fuerza, que avanzaba hacia algo hermoso, grande y verdadero. Ese anillo no es solo un objeto: es <strong>nuestro capítulo eterno</strong>." },
+            { title: "🍁 Octubre 2024", text: "Octubre tuvo conversaciones importantes, momentos de comprensión, aprendizajes compartidos. Fue un mes que nos hizo crecer. Porque el amor real no solo es romanticismo, también es apoyarse, hablar, escuchar, mejorar. Y nosotros lo hicimos, juntos, como un <strong>equipo que nada puede romper</strong>." },
+            { title: "🌧 Noviembre 2024", text: "El 28 de noviembre, mi cumpleaños, se sintió distinto… porque <strong>tú estabas ahí</strong>. Todo fue más bonito, más cálido, más mío. Tu presencia hizo que el día se sintiera especial sin necesidad de nada más. Ese mes entendí que el <strong>mejor regalo de mi vida eres tú</strong>." },
+            { title: "🎄 Diciembre 2024", text: "Diciembre llegó con luces, abrazos y un amor que ya había echado raíces profundas. Ese mes sentí que no era solo un fin de año… era el inicio de un futuro contigo. Mirarte en diciembre fue entender que quiero <strong>todos mis diciembres a tu lado</strong>." },
+            { title: "🌅 Enero 2025", text: "El 28 de enero de 2025 celebramos un año desde que te conocí. Un año desde que el destino me bendijo contigo. Recordar ese primer encuentro mientras te tenía entre mis brazos era una sensación indescriptible. Un año lleno de amor, crecimiento, compromiso, sueños y lucha juntos. Un año que solo fue el <strong>prólogo de todo lo que nos falta vivir</strong>." },
+            { title: "💗 Febrero 2025", text: "Febrero no necesitó chocolates ni regalos esta vez… porque <strong>tú ya eras mi regalo diario</strong>. Ese mes comprendí que nuestro amor había madurado, que ya éramos un nosotros sólido, fuerte, decidido. Cada abrazo tuyo se convirtió en un lugar donde quiero quedarme siempre." },
+            { title: "🌸 Marzo 2025", text: "Marzo volvió a traer el recuerdo de aquella pulserita de plata, pero esta vez nuestro amor era más profundo, más sereno, más real. Mirarte ahora y recordar ese comienzo me hizo sentir orgullo: <strong>hemos crecido, hemos avanzado, nos hemos sostenido</strong>. Y yo cada día te amo más." },
+            { title: "💞 Abril 2025", text: "El 6 de abril de 2025 celebramos <strong>un año de ser novios</strong>. Doce meses de elegirnos, de cuidarnos, de luchar y de reír. Un año donde tu amor fue mi motor y mi paz. Ese día confirmé que quiero que <strong>todos mis futuros lleven tu nombre</strong>." },
+            { title: "🌻 Mayo 2025", text: "En mayo, más que nunca, quise demostrártelo todo: que estoy contigo, que te apoyo, que te cuido, que no importa lo que pase, <strong>siempre voy a estar a tu lado</strong>. Ese mes te amé con hechos, no solo con palabras." },
+            { title: "🌙 Junio 2025", text: "Junio fue un mes suave, como una caricia. Las noches contigo se sentían eternas, los momentos simples se volvían valiosos, y cada instante era una prueba silenciosa de que <strong>eres mi hogar</strong>." },
+            { title: ☀️ Julio 2025", text: "En julio volví a admirarte como si fuera la primera vez. Tu fuerza, tu ternura, tu forma de enfrentar la vida… todo en ti me inspira. Ese mes entendí que no solo te amo: <strong>te respeto, te valoro y te admiro profundamente</strong>." },
+            { title: "🎂 Agosto 2025", text: "El 5 de agosto volvió a llenarme de alegría. Verte cumplir años es ver crecer la mujer que amo, la persona que quiero cuidar toda mi vida. Mi deseo siempre será el mismo: que sigas brillando, creciendo, sonriendo… y que <strong>yo pueda estar ahí para celebrarlo contigo</strong>." },
+            { title: "🍂 Septiembre 2025", text: "Septiembre recordó aquel anillo de 2024. Lo miro y siento orgullo, porque seguimos juntos, luchando, creciendo, confirmando con cada día que el amor es un <strong>camino que elegimos con el corazón</strong>." },
+            { title: "🍁 Octubre 2025", text: "En octubre comprendí que no importa cuánta tormenta haya afuera, a tu lado siempre hay calma. Tú eres mi paz, mi refugio, mi lugar favorito del mundo." },
+            { title: "🎉 Noviembre 2025", text: "El 28 de noviembre volví a celebrar mi vida contigo a mi lado. Y cada año que pasa me convenzo más: nacieron muchas personas, pero solo una era para mí. Y <strong>esa eres tú</strong>." },
+            { title: "✨ Diciembre 2025", text: "Hoy, mientras lees esto, quiero que recuerdes algo: cada mes contigo ha sido un poema vivo, y tú eres la protagonista de la historia más hermosa que he vivido. <strong>Eres mi mundo, mi sueño, mi destino</strong>. La mujer a la que amo con cada parte de mí. Y todo lo que soy, lo pongo a tus pies." }
+        ];
+        
+        const calculatedTotalPages = pageContent.length;
+        let pages = []; 
+
+
+        // --- Funciones de Utilidad ---
+
+        // Genera el HTML de una página
+        function createPageElement(index, content) {
+            const div = document.createElement('div');
+            // Clase de transición ajustada a la duración del volteo
+            div.className = 'page absolute top-0 left-0 transition-all duration-[1s] ease-in-out';
+            div.style.zIndex = calculatedTotalPages - index; // Z-index para orden apilado
+            div.setAttribute('data-index', index);
+            
+            // Flexbox permite que el contenedor de contenido se ajuste automáticamente para evitar desbordes
+            div.innerHTML = `
+                <h3 class="page-title">${content.title}</h3>
+                <div class="page-content-scroll page-content-container overflow-y-auto pr-2">
+                    <p class="text-gray-700">${content.text}</p>
+                </div>
+                <!-- El número de página es absoluto para no interferir con el cálculo de altura del contenido -->
+                <div class="absolute bottom-3 right-3 text-[#A88C6E] text-xs font-mono">Pág. ${index + 1}</div>
+            `;
+            return div;
+        }
+
+        // Inicializa y renderiza todas las páginas
+        function initializePages() {
+            pagesBlock.innerHTML = ''; 
+            pages = []; 
+
+            pageContent.forEach((content, index) => {
+                const page = createPageElement(index, content);
+                pages.push(page);
+                pagesBlock.appendChild(page);
+            });
+            
+            if (pages.length > 0) {
+                pages[0].classList.add('active'); 
+            }
+
+            updatePageIndicator(calculatedTotalPages);
+            updateNavigationButtons(calculatedTotalPages);
+            
+            if (!isBookOpen) {
+                pagesBlock.classList.add('hidden-pages');
+                navigationControls.classList.add('opacity-0', 'pointer-events-none');
+            }
+        }
+
+        // Actualiza el indicador de página (ej. Pág. 3 / 24)
+        function updatePageIndicator(total) {
+            pageIndicator.textContent = `Pág. ${currentPageIndex + 1} / ${total}`;
+        }
+
+        // Actualiza el estado de los botones de navegación
+        function updateNavigationButtons(total) {
+            prevPageBtn.disabled = currentPageIndex === 0;
+            nextPageBtn.disabled = currentPageIndex === total - 1;
+        }
+
+        // Reproduce un sonido de "pasar página"
+        function playPageTurnSound() {
+            if (pageTurnSound) {
+                pageTurnSound.currentTime = 0; 
+                pageTurnSound.play().catch(e => console.log("No se pudo reproducir el sonido:", e.message));
+            }
+        }
+        
+        // --- Lógica Principal del Libro ---
+
+        // Abre o cierra el libro
+        function toggleBook() {
+            isBookOpen = !isBookOpen;
+
+            if (isBookOpen) {
+                // ABRIR libro
+                bookContainer.classList.add('open');
+                coverFront.classList.add('flipped'); 
+                toggleBookBtn.textContent = 'Cerrar Libro';
+                
+                // Mostrar páginas y controles (después de que la portada inicie el flip)
+                setTimeout(() => {
+                    pagesBlock.classList.remove('hidden-pages');
+                    navigationControls.classList.remove('opacity-0', 'pointer-events-none');
+                    
+                    pages.forEach((page, index) => {
+                        page.classList.remove('flipped', 'prev-flipped', 'active');
+                        if (index === currentPageIndex) {
+                            page.classList.add('active');
+                        }
+                    });
+                    for (let i = 0; i < currentPageIndex; i++) {
+                         pages[i].classList.add('prev-flipped');
+                    }
+                    updateNavigationButtons(calculatedTotalPages);
+                }, 1500); 
+
+            } else {
+                // CERRAR libro
+                coverFront.classList.remove('flipped'); 
+                bookContainer.classList.remove('open');
+                toggleBookBtn.textContent = 'Abrir Libro';
+
+                // Ocultar controles y bloque de páginas
+                navigationControls.classList.add('opacity-0', 'pointer-events-none'); 
+                pagesBlock.classList.add('hidden-pages');
+
+                // Reiniciar el estado de la página al cerrar, para que al abrirlo se vea la primera página
+                currentPageIndex = 0;
+                pages.forEach(page => page.classList.remove('flipped', 'prev-flipped', 'active'));
+                if (pages.length > 0) {
+                    pages[0].classList.add('active');
+                }
+                updatePageIndicator(calculatedTotalPages);
+                updateNavigationButtons(calculatedTotalPages);
+            }
+        }
+
+        // Pasa a la página siguiente
+        function nextPage() {
+            if (currentPageIndex < calculatedTotalPages - 1) {
+                const currentPage = pages[currentPageIndex];
+                
+                playPageTurnSound();
+                
+                currentPage.classList.remove('active');
+                currentPage.classList.add('flipped');
+
+                currentPageIndex++;
+                const newPage = pages[currentPageIndex];
+                
+                newPage.classList.remove('flipped', 'prev-flipped');
+                newPage.classList.add('active');
+
+                updatePageIndicator(calculatedTotalPages);
+                updateNavigationButtons(calculatedTotalPages);
+            }
+        }
+
+        // Retrocede a la página anterior
+        function prevPage() {
+            if (currentPageIndex > 0) {
+                const currentPage = pages[currentPageIndex];
+                
+                playPageTurnSound();
+                
+                currentPage.classList.remove('active');
+
+                currentPageIndex--;
+                const newPage = pages[currentPageIndex];
+
+                // Mueve la página actual (la que se está dejando) a 'prev-flipped'
+                currentPage.classList.remove('flipped');
+                currentPage.classList.add('prev-flipped'); 
+
+                // La nueva página (anterior) se convierte en activa
+                newPage.classList.remove('flipped', 'prev-flipped');
+                newPage.classList.add('active');
+                
+                updatePageIndicator(calculatedTotalPages);
+                updateNavigationButtons(calculatedTotalPages);
+            }
+        }
+
+        // --- Inicialización ---
+        window.onload = () => {
+            initializePages();
+            
+            // Efecto de inclinación sutil al pasar el ratón
+            bookContainer.addEventListener('mouseenter', () => {
+                if (!isBookOpen) { 
+                    bookContainer.style.transform = 'rotateY(-2deg) rotateX(1deg)';
+                }
+            });
+
+            bookContainer.addEventListener('mouseleave', () => {
+                if (!isBookOpen) {
+                    bookContainer.style.transform = 'rotateY(0deg) rotateX(0deg)';
+                }
+            });
+        };
+        
+        // Exponer funciones al scope global para los botones
+        window.toggleBook = toggleBook;
+        window.nextPage = nextPage;
+        window.prevPage = prevPage;
+
+    </script>
+</body>
+</html>
